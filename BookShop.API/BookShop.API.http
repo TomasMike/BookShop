@@ -2,12 +2,12 @@
 
 
 
-GET {{BookShop_HostAddress}}/Book
+GET {{BookShop_HostAddress}}/api/Book
 Accept: application/json
 
 ###
 
-POST {{BookShop_HostAddress}}/Book
+POST {{BookShop_HostAddress}}/api/Book
 Content-Type: application/json
 {
     "title": "Dune",
@@ -20,7 +20,7 @@ Content-Type: application/json
 
 ###
 
-POST {{BookShop_HostAddress}}/Book
+POST {{BookShop_HostAddress}}/api/Book
 Content-Type: application/json
 -H "Authorization : Bearer CfDJ8LAcSxZtk9VMpClKkOlveZNFLFGanBhfnwSgNfyQ_roJq2mYqu7zEF5auhJy-qaOb_5rFNLXIGS6R6bn-HDZO579XgDIcGtB6GFojwtkd8Vz3NTeAQmYynVNFxwAToh8qsht54EraFk1HP4s_2zXi5R_E6RtH245p-4wXlGN-IQq1NB8zEUCWL549yc0phaB6EKMR82GFCOklwlbYOD4sfXzNG94frPZnj7RGsxJAQqyk802MhRQPq1HsQeGWg1TXscM2PCMHfJwRbzXcLGHpMHrcj1ScxSUc_ZEfy3DnOBI6kjT68LumXhBoI12mYBlf0g2kWn16opD5w0JntSsib8JrnVLCWsCvEOPvta5rs-pw62lbw8iGF8bSy39bKwOqTDzo_GCmkGRkZ_3oaKA9balDEeGwzAzgccF-v1b2Wu7dJjPPtxaPMioVOmbm6cmQN_N7WjHHePFI7sZYpIIdnlQ0WiO8jn-F5v1uDvQzwrEh4sVD7FwakLSpD2f91H1xeKYKwUDR7lnI-m25f5WYZ2N-7Lh6WbN-BWcu6mFCURyeaq36odehrbjn3ayknR-l4jd5x4QIatc0MbzGEeHr-2DS2hAfnvRt8A2hv33m6i4ldZ-zO6dpyWtAlAmPraXcxuqFKnB790G11j1yn1mawprUMRZ94EpavsWw2nk5yxk4qDtNRKqIg5gRcue3hba9exr7o5KlnsCftqwk2wwwoM"
 {
@@ -33,11 +33,11 @@ Content-Type: application/json
 }
 
 ###
-GET {{BookShop_HostAddress}}/Book/1
+GET {{BookShop_HostAddress}}/api/Book/1
 Accept: application/json
 
 ###
-POST {{CarShop_HostAddress}}/register
+POST {{BookShop_HostAddress}}/register
 Content-Type: application/json
 
 {
@@ -46,7 +46,7 @@ Content-Type: application/json
 }
 
 ###
-POST {{CarShop_HostAddress}}/login
+POST {{BookShop_HostAddress}}/login
 Content-Type: application/json
 {
   "email": "testuser@example.com",

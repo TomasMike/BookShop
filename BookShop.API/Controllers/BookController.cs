@@ -11,8 +11,9 @@ namespace BookShop.API.Controllers
     /// Controller for managing book operations in the BookShop API.
     /// Provides endpoints for retrieving and creating books.
     /// </summary>
-    [Route("[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -38,6 +39,7 @@ namespace BookShop.API.Controllers
         /// This endpoint does not require authentication.
         /// Example: GET /book
         /// </remarks>
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksAsync()
         {
@@ -92,7 +94,6 @@ namespace BookShop.API.Controllers
         /// Required Header:
         /// Authorization: Bearer {token}
         /// </remarks>
-        [Authorize]
         [HttpPost]
         public async Task<ActionResult<Book>> AddBook(Book book)
         {

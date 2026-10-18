@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using BookShop.Core.Services;
 using BookShop.Core.Models;
 using BookShop.API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookShop.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PaymentsController : ControllerBase

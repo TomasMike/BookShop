@@ -2,6 +2,7 @@ import './App.css';
 import { useState } from 'react';
 import { BooksDashboard } from '../BookDashboard/BooksDashboard';
 import { LoginPanel, responseError } from '../LoginPanel/LoginPanel';
+import { OrderList } from '../OrderList/OrderList';
 
 function App() {
     const [pageState, setPageState] = useState('dashboard');
@@ -10,9 +11,13 @@ function App() {
     const renderPage = () => {
         switch (pageState) {
             case 'dashboard':
-                return <BooksDashboard isAuthenticated={isAuthenticated} />;
+                return <>
+                    <BooksDashboard isAuthenticated={isAuthenticated} />
+                    <OrderList isAuthenticated={isAuthenticated} />
+                    
+                </>
             default:
-                return <OrderList />;
+                return <OrderList isAuthenticated={isAuthenticated} />;
         }
     };
 

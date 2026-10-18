@@ -119,6 +119,21 @@ namespace BookShop.API.Controllers
             }
         }
 
+        [HttpGet("customer")]
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetMyOrders()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (userId == null)
+                return Unauthorized();
+
+            var customer = await _customerService.GetCustomerByUserIdAsync(userId);
+            if (customer == null)
+                return NotFound(new { error = "No customer profile is associated with this account" });
+
+            var orders = await _orderService.GetOrdersByCustomerAsync(customer.Id);
+            return Ok(orders.Select(MapToOrderDto).ToList());
+        }
+
         private static OrderDto MapToOrderDto(BookShop.Core.Models.Order order)
         {
             return new OrderDto

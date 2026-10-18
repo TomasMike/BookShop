@@ -95,19 +95,19 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<your-connection-
 
 ## API Overview
 
-<!-- Adjust to match your real endpoints. -->
+
 
 | Method | Endpoint          | Description            |
 | ------ | ----------------- | ---------------------- |
-| GET    | `/Book`       | List all books          |
-| GET    | `/Book/{id}`  | Get a book by ID        |
-| POST   | `/Book`       | Create a new book       |
+| GET    | `/api/book`       | List all books          |
+| GET    | `/api/book/{id}`  | Get a book by ID        |
+| POST   | `/api/book`       | Create a new book       |
 | POST   | `/api/orders` | Create an order         |
 
 Example request:
 
 ```http
-POST /Book
+POST /api/book
 Content-Type: application/json
 
 {
@@ -128,7 +128,6 @@ Full interactive documentation is available via Swagger when the API is running.
 dotnet test
 ```
 
-<!-- TODO: describe your unit / integration tests once added. -->
 
 ## Roadmap
 
@@ -145,4 +144,3 @@ dotnet test
 **Tomas Mike**
 GitHub: [@TomasMike](https://github.com/TomasMike)
 
-<!-- Optional: add LinkedIn / portfolio links. -->

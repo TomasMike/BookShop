@@ -29,10 +29,6 @@ public partial class Program
                 Description = "REST API for browsing and ordering books."
             });
 
-            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath);
-
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -78,12 +74,11 @@ public partial class Program
             // Seed books
             if (!context.Books.Any())
             {
-                var frankHerbert = new Author { Id = 1, Name = "Frank Herbert" };
-                var ursulaLeGuin = new Author { Id = 2, Name = "Ursula K. Le Guin" };
+                
 
                 context.Books.AddRange(
-                    new Book { Author = frankHerbert, Title = "Dune", PublishedYear = 1965, Price = 12.99m, ISBN = "9780441172719", IsAvailable = true },
-                    new Book { Author = ursulaLeGuin, Title = "A Wizard of Earthsea", PublishedYear = 1968, Price = 11.99m, ISBN = "9780547773742", IsAvailable = true }
+                    new Book { Author = new Author { Id = 1, Name = "Frank Herbert" }, Title = "Dune", PublishedYear = 1965, Price = 12.99m, ISBN = "9780441172719", IsAvailable = true },
+                    new Book { Author = new Author { Id = 2, Name = "Ursula K. Le Guin" }, Title = "A Wizard of Earthsea", PublishedYear = 1968, Price = 11.99m, ISBN = "9780547773742", IsAvailable = true }
                 );
 
                 await context.SaveChangesAsync();
@@ -102,6 +97,7 @@ public partial class Program
 
 
         //add customer role to new registered users and create customer record
+        //app.MapGroup("/api").MapIdentityApi<IdentityUser>().AddEndpointFilter(async (context, next) =>
         app.MapIdentityApi<IdentityUser>().AddEndpointFilter(async (context, next) =>
         {
             var request = context.Arguments.OfType<RegisterRequest>().FirstOrDefault();
