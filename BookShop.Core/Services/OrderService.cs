@@ -16,7 +16,7 @@ namespace BookShop.Core.Services
             _customerRepository = customerRepository;
         }
 
-        public async Task<Order> CreateOrderAsync(int bookId, int customerId)
+        public async Task<(Order Order, bool Created)> AddBookToOpenOrderAsync(int bookId, int customerId)
         {
             var book = await _bookRepository.GetByIdAsync(bookId);
             if (book == null)
@@ -29,18 +29,26 @@ namespace BookShop.Core.Services
             if (customer == null)
                 throw new InvalidOperationException("Customer not found");
 
-            var order = new Order
+            var order = await _orderRepository.GetLatestOpenByCustomerIdAsync(customerId);
+            if (order == null)
             {
-                BookId = bookId,
-                CustomerId = customerId,
-                Book = book,
-                Customer = null!,            // quick workaround to satisfy 'required'
-                OrderDate = DateTime.UtcNow,
-                Status = OrderStatus.Pending,
-                TotalPrice = book.Price
-            };
+                order = new Order
+                {
+                    BookId = bookId,
+                    CustomerId = customerId,
+                    Book = book,
+                    Customer = customer,
+                    OrderDate = DateTime.UtcNow,
+                    Status = OrderStatus.Pending,
+                    TotalPrice = 0
+                };
+                AddBookDetail(order, book);
+                return (await _orderRepository.AddAsync(order), true);
+            }
 
-            return await _orderRepository.AddAsync(order);
+            AddBookDetail(order, book);
+            await _orderRepository.UpdateAsync(order);
+            return (order, false);
         }
 
         public async Task<Order?> GetOrderByIdAsync(int orderId)
@@ -51,6 +59,43 @@ namespace BookShop.Core.Services
         public async Task<IEnumerable<Order>> GetOrdersByCustomerAsync(int customerId)
         {
             return await _orderRepository.GetByCustomerIdAsync(customerId);
+        }
+
+        public async Task<Order?> UpdateOrderDetailQuantityAsync(int orderId, int detailId, int customerId, int quantity)
+        {
+            if (quantity < 1)
+                throw new InvalidOperationException("Quantity must be at least one");
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null || order.CustomerId != customerId)
+                return null;
+            EnsureOrderIsOpen(order);
+
+            var detail = order.Details.FirstOrDefault(item => item.Id == detailId);
+            if (detail == null)
+                return null;
+
+            detail.Quantity = quantity;
+            UpdateTotalPrice(order);
+            await _orderRepository.UpdateAsync(order);
+            return order;
+        }
+
+        public async Task<Order?> RemoveOrderDetailAsync(int orderId, int detailId, int customerId)
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null || order.CustomerId != customerId)
+                return null;
+            EnsureOrderIsOpen(order);
+
+            var detail = order.Details.FirstOrDefault(item => item.Id == detailId);
+            if (detail == null)
+                return null;
+
+            order.Details.Remove(detail);
+            UpdateTotalPrice(order);
+            await _orderRepository.UpdateAsync(order);
+            return order;
         }
 
         public async Task<bool> CancelOrderAsync(int orderId)
@@ -76,6 +121,39 @@ namespace BookShop.Core.Services
             order.Status = OrderStatus.Confirmed;
             await _orderRepository.UpdateAsync(order);
             return order;
+        }
+
+        private static void AddBookDetail(Order order, Book book)
+        {
+            var detail = order.Details.FirstOrDefault(item => item.BookId == book.Id);
+            if (detail == null)
+            {
+                order.Details.Add(new OrderDetail
+                {
+                    Order = order,
+                    BookId = book.Id,
+                    Book = book,
+                    Quantity = 1,
+                    UnitPrice = book.Price
+                });
+            }
+            else
+            {
+                detail.Quantity++;
+            }
+
+            UpdateTotalPrice(order);
+        }
+
+        private static void UpdateTotalPrice(Order order)
+        {
+            order.TotalPrice = order.Details.Sum(detail => detail.UnitPrice * detail.Quantity);
+        }
+
+        private static void EnsureOrderIsOpen(Order order)
+        {
+            if (order.Status != OrderStatus.Pending)
+                throw new InvalidOperationException("Only open orders can be changed");
         }
     }
 }

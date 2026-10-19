@@ -11,9 +11,9 @@ namespace BookShop.Core.Models
         public OrderStatus Status { get; set; }
         public decimal TotalPrice { get; set; }
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<OrderDetail> Details { get; set; } = new List<OrderDetail>();
     }
 }
-
 
 
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { responseError } from '../api';
 
 export function LoginPanel({ onAuthChange })
 {
@@ -182,19 +183,6 @@ export function LoginPanel({ onAuthChange })
             <p></p>
         </>
     );
-}
-
-export async function responseError(response)
-{
-    try
-    {
-        const body = await response.json();
-        return body.error || body.detail || body.title || Object.values(body.errors || {}).flat().join(' ') || 'Sign-in failed.';
-    }
-    catch
-    {
-        return 'Sign-in failed.';
-    }
 }
 
 export default LoginPanel;

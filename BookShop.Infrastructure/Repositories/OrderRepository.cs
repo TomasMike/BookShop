@@ -26,6 +26,9 @@ namespace BookShop.Infrastructure.Repositories
             return await _context.Orders
                 .Include(o => o.Book)
                 .ThenInclude(c => c.Author)
+                .Include(o => o.Details)
+                .ThenInclude(d => d.Book)
+                .ThenInclude(b => b.Author)
                 .Include(o => o.Customer)
                 .Include(o => o.Payments)
                 .FirstOrDefaultAsync(o => o.Id == id);
@@ -37,8 +40,23 @@ namespace BookShop.Infrastructure.Repositories
                 .Where(o => o.CustomerId == customerId)
                 .Include(o => o.Book)
                 .ThenInclude(c => c.Author)
+                .Include(o => o.Details)
+                .ThenInclude(d => d.Book)
+                .ThenInclude(b => b.Author)
                 .Include(o => o.Payments)
                 .ToListAsync();
+        }
+
+        public async Task<Order?> GetLatestOpenByCustomerIdAsync(int customerId)
+        {
+            return await _context.Orders
+                .Where(o => o.CustomerId == customerId && o.Status == OrderStatus.Pending)
+                .OrderByDescending(o => o.OrderDate)
+                .ThenByDescending(o => o.Id)
+                .Include(o => o.Details)
+                .ThenInclude(d => d.Book)
+                .ThenInclude(b => b.Author)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Order>> GetAllAsync()
@@ -48,6 +66,9 @@ namespace BookShop.Infrastructure.Repositories
                 .ThenInclude(c => c.Author)
                 .Include(o => o.Customer)
                 .Include(o => o.Payments)
+                .Include(o => o.Details)
+                .ThenInclude(d => d.Book)
+                .ThenInclude(b => b.Author)
                 .ToListAsync();
         }
 

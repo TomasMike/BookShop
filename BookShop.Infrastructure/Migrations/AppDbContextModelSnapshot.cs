@@ -118,6 +118,33 @@ namespace BookShop.Infrastructure.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("BookShop.Core.Models.OrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderDetails");
+                });
+
             modelBuilder.Entity("BookShop.Core.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -387,6 +414,25 @@ namespace BookShop.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("BookShop.Core.Models.OrderDetail", b =>
+                {
+                    b.HasOne("BookShop.Core.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BookShop.Core.Models.Order", "Order")
+                        .WithMany("Details")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("BookShop.Core.Models.Payment", b =>
                 {
                     b.HasOne("BookShop.Core.Models.Order", "Order")
@@ -456,6 +502,8 @@ namespace BookShop.Infrastructure.Migrations
 
             modelBuilder.Entity("BookShop.Core.Models.Order", b =>
                 {
+                    b.Navigation("Details");
+
                     b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618

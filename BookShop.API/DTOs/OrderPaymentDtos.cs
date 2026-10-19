@@ -7,14 +7,33 @@ namespace BookShop.API.DTOs
         public int BookId { get; set; }
     }
 
-    public class OrderDto
+    /// <summary>Provides the new quantity for a book in an open order.</summary>
+    public class UpdateOrderDetailRequest
+    {
+        public int Quantity { get; set; }
+    }
+
+    /// <summary>Represents one book and its quantity in an order.</summary>
+    public class OrderDetailDto
     {
         public int Id { get; set; }
         public int BookId { get; set; }
+        public string BookTitle { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+    }
+
+    /// <summary>Represents an order and its book details.</summary>
+    public class OrderDto
+    {
+        public int Id { get; set; }
         public int CustomerId { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = string.Empty;
         public decimal TotalPrice { get; set; }
+        public List<OrderDetailDto> Details { get; set; } = [];
     }
 
     public class  CustomerDto

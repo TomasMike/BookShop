@@ -96,9 +96,8 @@ public partial class Program
         }
 
 
-        //add customer role to new registered users and create customer record
-        //app.MapGroup("/api").MapIdentityApi<IdentityUser>().AddEndpointFilter(async (context, next) =>
-        app.MapIdentityApi<IdentityUser>().AddEndpointFilter(async (context, next) =>
+        // Add the customer role and profile after Identity registers a user.
+        app.MapGroup("/api").WithTags("Identity").MapIdentityApi<IdentityUser>().AddEndpointFilter(async (context, next) =>
         {
             var request = context.Arguments.OfType<RegisterRequest>().FirstOrDefault();
 

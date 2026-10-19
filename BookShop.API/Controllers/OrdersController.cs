@@ -21,10 +21,10 @@ namespace BookShop.API.Controllers
         }
 
         /// <summary>
-        /// Creates a new order for a book
+        /// Adds a book to the customer's latest open order or creates an order.
         /// </summary>
         /// <param name="request">Order creation request containing the book ID</param>
-        /// <returns>The created order</returns>
+        /// <returns>The updated or newly created order</returns>
         [HttpPost]
         public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CreateOrderRequest request)
         {
@@ -38,9 +38,11 @@ namespace BookShop.API.Controllers
 
             try
             {
-                var order = await _orderService.CreateOrderAsync(request.BookId, customer.Id);
+                var (order, created) = await _orderService.AddBookToOpenOrderAsync(request.BookId, customer.Id);
                 var dto = MapToOrderDto(order);
-                return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, dto);
+                return created
+                    ? CreatedAtAction(nameof(GetOrder), new { id = order.Id }, dto)
+                    : Ok(dto);
             }
             catch (InvalidOperationException ex)
             {
@@ -57,7 +59,10 @@ namespace BookShop.API.Controllers
         public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
-            if (order == null)
+            var customer = await GetCurrentCustomerAsync();
+            if (customer == null)
+                return NotFound(new { error = "No customer profile is associated with this account" });
+            if (order == null || order.CustomerId != customer.Id)
                 return NotFound(new { error = "Order not found" });
 
             var dto = MapToOrderDto(order);
@@ -134,16 +139,67 @@ namespace BookShop.API.Controllers
             return Ok(orders.Select(MapToOrderDto).ToList());
         }
 
+        [HttpPut("{orderId}/details/{detailId}")]
+        public async Task<ActionResult<OrderDto>> UpdateOrderDetail(int orderId, int detailId, [FromBody] UpdateOrderDetailRequest request)
+        {
+            var customer = await GetCurrentCustomerAsync();
+            if (customer == null)
+                return NotFound(new { error = "No customer profile is associated with this account" });
+
+            try
+            {
+                var order = await _orderService.UpdateOrderDetailQuantityAsync(orderId, detailId, customer.Id, request.Quantity);
+                return order == null ? NotFound(new { error = "Order detail not found" }) : Ok(MapToOrderDto(order));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{orderId}/details/{detailId}")]
+        public async Task<ActionResult<OrderDto>> RemoveOrderDetail(int orderId, int detailId)
+        {
+            var customer = await GetCurrentCustomerAsync();
+            if (customer == null)
+                return NotFound(new { error = "No customer profile is associated with this account" });
+
+            try
+            {
+                var order = await _orderService.RemoveOrderDetailAsync(orderId, detailId, customer.Id);
+                return order == null ? NotFound(new { error = "Order detail not found" }) : Ok(MapToOrderDto(order));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        private async Task<BookShop.Core.Models.Customer?> GetCurrentCustomerAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            return userId == null ? null : await _customerService.GetCustomerByUserIdAsync(userId);
+        }
+
         private static OrderDto MapToOrderDto(BookShop.Core.Models.Order order)
         {
             return new OrderDto
             {
                 Id = order.Id,
-                BookId = order.BookId,
                 CustomerId = order.CustomerId,
                 OrderDate = order.OrderDate,
                 Status = order.Status.ToString(),
-                TotalPrice = order.TotalPrice
+                TotalPrice = order.TotalPrice,
+                Details = order.Details.Select(detail => new OrderDetailDto
+                {
+                    Id = detail.Id,
+                    BookId = detail.BookId,
+                    BookTitle = detail.Book.Title,
+                    AuthorName = detail.Book.Author.Name,
+                    Quantity = detail.Quantity,
+                    UnitPrice = detail.UnitPrice,
+                    LineTotal = detail.UnitPrice * detail.Quantity
+                }).ToList()
             };
         }
     }

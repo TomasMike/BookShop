@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { responseError } from '../LoginPanel/LoginPanel';
+import { responseError } from '../api';
 
-export function OrderList({ isAuthenticated })
+export function OrderList({ isAuthenticated, onOpenOrder })
 {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -61,20 +61,22 @@ export function OrderList({ isAuthenticated })
                     <thead>
                         <tr>
                             <th>Order</th>
-                            <th>Book</th>
+                            <th>Books</th>
                             <th>Date</th>
                             <th>Status</th>
                             <th>Total</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         {orders.map((order) => (
                             <tr key={order.id}>
                                 <td>#{order.id}</td>
-                                <td>#{order.bookId}</td>
+                                <td>{order.details?.map((detail) => `${detail.bookTitle} × ${detail.quantity}`).join(', ') || 'No books'}</td>
                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
                                 <td>{order.status}</td>
                                 <td>{Number(order.totalPrice).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })}</td>
+                                <td><button type="button" onClick={() => onOpenOrder(order.id)}>View order</button></td>
                             </tr>
                         ))}
                     </tbody>

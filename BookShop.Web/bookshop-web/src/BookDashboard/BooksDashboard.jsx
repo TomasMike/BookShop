@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
-import { responseError } from '../App/App';
+import { useEffect, useState } from 'react';
+import { responseError } from '../api';
 
-export function BooksDashboard({ isAuthenticated })
+export function BooksDashboard({ isAuthenticated, onOpenOrder })
 {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [name, setName] = useState('');
-    const [price, setPrice] = useState('');
-    const [saving, setSaving] = useState(false);
     const [orderingBookId, setOrderingBookId] = useState(null);
-    const [orderMessage, setOrderMessage] = useState('');
 
     useEffect(() =>
     {
@@ -37,41 +33,9 @@ export function BooksDashboard({ isAuthenticated })
         return () => { cancelled = true; };
     }, []);
 
-    async function addBook(event)
-    {
-        event.preventDefault();
-        setSaving(true);
-        setError('');
-
-        try
-        {
-            const response = await fetch('/api/book', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${sessionStorage.getItem('bookshop.accessToken')}`,
-                },
-                body: JSON.stringify({ name, price: Number(price) }),
-            });
-            if (!response.ok) throw new Error(await responseError(response));
-
-            const book = await response.json();
-            setBooks((currentBooks) => [...currentBooks, book]);
-            setName('');
-            setPrice('');
-        } catch (saveError)
-        {
-            setError(saveError.message || 'Could not add the book.');
-        } finally
-        {
-            setSaving(false);
-        }
-    }
-
-    async function createOrder(book)
+    async function addToOrder(book)
     {
         setOrderingBookId(book.id);
-        setOrderMessage('');
         setError('');
 
         try
@@ -87,10 +51,10 @@ export function BooksDashboard({ isAuthenticated })
             if (!response.ok) throw new Error(await responseError(response));
 
             const order = await response.json();
-            setOrderMessage(`Order #${order.id} created successfully.`);
+            onOpenOrder(order.id);
         } catch (orderError)
         {
-            setError(orderError.message || 'Could not create the order.');
+            setError(orderError.message || 'Could not add the book to an order.');
         } finally
         {
             setOrderingBookId(null);
@@ -102,7 +66,6 @@ export function BooksDashboard({ isAuthenticated })
             <h1>Books Dashboard</h1>
             {loading && <p>Loading books…</p>}
             {error && <p className="error" role="alert">{error}</p>}
-            {orderMessage && <p role="status">{orderMessage}</p>}
             <table>
                 <thead>
                     <tr>
@@ -117,15 +80,15 @@ export function BooksDashboard({ isAuthenticated })
                             <td>{book.title} - {book.author?.name}</td>
                             <td>{Number(book.price).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })}</td>
                             <td>
-                               {/*  {isAuthenticated ? (
+                                {isAuthenticated && (
                                     <button
                                         type="button"
-                                        onClick={() => createOrder(book)}
-                                        disabled={orderingBookId !== null}
+                                        onClick={() => addToOrder(book)}
+                                        disabled={orderingBookId !== null || !book.isAvailable}
                                     >
-                                        {orderingBookId === book.id ? 'Ordering…' : 'Order'}
+                                        {orderingBookId === book.id ? 'Adding…' : book.isAvailable ? 'Add to order' : 'Unavailable'}
                                     </button>
-                                ) : 'Sign in to order'} */}
+                                )}
                             </td>
                         </tr>
                     ))}

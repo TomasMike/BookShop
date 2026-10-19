@@ -37,7 +37,7 @@ GET {{BookShop_HostAddress}}/api/Book/1
 Accept: application/json
 
 ###
-POST {{BookShop_HostAddress}}/register
+POST {{BookShop_HostAddress}}/api/register
 Content-Type: application/json
 
 {
@@ -46,9 +46,44 @@ Content-Type: application/json
 }
 
 ###
-POST {{BookShop_HostAddress}}/login
+POST {{BookShop_HostAddress}}/api/login
 Content-Type: application/json
 {
   "email": "testuser@example.com",
   "password": "SecurePassword123!"
 }
+
+###
+@accessToken = replace-with-access-token
+@orderId = 1
+@detailId = 1
+
+### Add a book to the current customer's latest open order, or create one
+POST {{BookShop_HostAddress}}/api/orders
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "bookId": 1
+}
+
+### Get the current customer's orders, including all book details
+GET {{BookShop_HostAddress}}/api/orders/customer
+Authorization: Bearer {{accessToken}}
+
+### Get one of the current customer's orders
+GET {{BookShop_HostAddress}}/api/orders/{{orderId}}
+Authorization: Bearer {{accessToken}}
+
+### Change the quantity of an item in an open order
+PUT {{BookShop_HostAddress}}/api/orders/{{orderId}}/details/{{detailId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
+
+### Remove an item from an open order
+DELETE {{BookShop_HostAddress}}/api/orders/{{orderId}}/details/{{detailId}}
+Authorization: Bearer {{accessToken}}

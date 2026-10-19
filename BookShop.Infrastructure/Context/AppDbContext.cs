@@ -20,6 +20,7 @@ namespace BookShop.Context
         public DbSet<Book> Books => Set<Book>();
         public DbSet<Author> Authors => Set<Author>();
         public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Customer> Customers => Set<Customer>();
 
